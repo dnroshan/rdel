@@ -9,5 +9,5 @@ cargo build --release
 ```
 ## Usage
 ```
-del [OPTION] ... [FILE] ...
+rdel [OPTION] ... [FILE] ...
 ```
