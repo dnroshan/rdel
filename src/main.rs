@@ -1,7 +1,7 @@
 use chrono::Utc;
 use clap::Parser;
 use std::env;
-use std::fs::{File, rename};
+use std::fs::{File, exists, rename};
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 
@@ -28,12 +28,13 @@ fn main() -> std::io::Result<()> {
         let mut trash_info_path = trash_path.clone();
         trash_info_path.push("info");
         if let Some(filename) = path.file_name() {
-            trash_file_path.push(filename);
-            create_trash_info_file(
-                filename.to_str().expect("invalid UTF-8 string"),
-                &trash_info_path,
-                &path,
-            )?;
+            let filename = filename.to_str().expect("invalid UTF-8 string");
+            let filename = match need_postfix(&trash_file_path, filename) {
+                Some(name) => name,
+                None => String::from(filename),
+            };
+            trash_file_path.push(&filename);
+            create_trash_info_file(&filename, &trash_info_path, &path)?;
         } else {
             continue;
         }
@@ -84,4 +85,29 @@ fn create_trash_info_file(
 fn get_time_stamp() -> String {
     let now = Utc::now();
     now.format("%Y-%m-%dT%H:%M:%S").to_string()
+}
+
+fn need_postfix(trash_file_path: &Path, filename: &str) -> Option<String> {
+    match exists(trash_file_path.join(filename)) {
+        Ok(val) => {
+            if val == false {
+                return None;
+            }
+        }
+        Err(_) => panic!("file operation error"),
+    }
+
+    let mut postfix = 1;
+    loop {
+        let new_filename = std::format!("{}.{}", filename, postfix);
+        match exists(trash_file_path.join(&new_filename)) {
+            Ok(val) => {
+                if val == false {
+                    return Some(new_filename);
+                }
+            }
+            Err(_) => panic!("file operation error"),
+        }
+        postfix += 1;
+    }
 }
