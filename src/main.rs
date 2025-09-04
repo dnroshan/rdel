@@ -8,8 +8,8 @@ use std::path::{Path, PathBuf};
 #[derive(Parser, Debug)]
 #[command(name = "rdel")]
 #[command(version = "0.6")]
-#[command(
-    about = "a command to delete files and directories to trash\nCopyright (C) 2025 DIlnavas Roshan"
+#[command(about = r#"A command to delete files and directories to trash
+Copyright (C) 2025 Dilnavas Roshan"#
 )]
 #[command(long_about=None)]
 struct Args {
